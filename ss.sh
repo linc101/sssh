@@ -6,7 +6,7 @@
 set -e
 
 usage(){
-	echo -e '开始翻墙或者更新翻墙信息：ss.sh+create+ss服务器ip+ss服务器端口+加密方法+密码，示例:\nss.sh create 123.123.123.123 9001 aes-256-cfb sdhywfygb324234b\n取消翻墙，复原所有更改：\nss.sh remove';
+	echo -e '开始或者更新信息：ss.sh+create+ss服务器ip+ss服务器端口+加密方法+密码，示例:\nss.sh create 123.123.123.123 9001 aes-256-cfb sdhywfygb324234b\n取消，复原所有更改：\nss.sh remove';
 }
 sstunnel(){
 	sstunnelpid=`ps -ef|grep ss-tunnel|grep -v grep|awk '{print $2}'`
@@ -69,19 +69,20 @@ createipsetandiptables(){
 	ipset destroy shadowsocks || true
 	ipset create shadowsocks hash:net
 	ipset add shadowsocks 10.30.30.0/24
-	cat /root/.sscnf/chinadns-1.3.2/chnroute.txt | awk '{print "ipset add shadowsocks "$0}' | sh
+	# cat /root/.sscnf/chinadns-1.3.2/chnroute.txt | awk '{print "ipset add shadowsocks "$0}' | sh
 	iptables -t nat -N shadowsocks
-	iptables -t nat -A shadowsocks -d $ip/32 -j RETURN
-	iptables -t nat -A shadowsocks -d 0.0.0.0/8 -j RETURN
-	iptables -t nat -A shadowsocks -d 10.0.0.0/8 -j RETURN
-	iptables -t nat -A shadowsocks -d 127.0.0.0/8 -j RETURN
-	iptables -t nat -A shadowsocks -d 169.254.0.0/16 -j RETURN
-	iptables -t nat -A shadowsocks -d 172.16.0.0/12 -j RETURN
-	iptables -t nat -A shadowsocks -d 192.168.0.0/16 -j RETURN
-	iptables -t nat -A shadowsocks -d 224.0.0.0/4 -j RETURN
-	iptables -t nat -A shadowsocks -d 240.0.0.0/4 -j RETURN
-	iptables -t nat -A shadowsocks -m set --match-set shadowsocks dst -j RETURN
-	iptables -t nat -A shadowsocks -p tcp -j REDIRECT --to-ports 1090
+	# iptables -t nat -A shadowsocks -d $ip/32 -j RETURN
+	# iptables -t nat -A shadowsocks -d 0.0.0.0/8 -j RETURN
+	# iptables -t nat -A shadowsocks -d 10.0.0.0/8 -j RETURN
+	# iptables -t nat -A shadowsocks -d 127.0.0.0/8 -j RETURN
+	# iptables -t nat -A shadowsocks -d 169.254.0.0/16 -j RETURN
+	# iptables -t nat -A shadowsocks -d 172.16.0.0/12 -j RETURN
+	# iptables -t nat -A shadowsocks -d 192.168.0.0/16 -j RETURN
+	# iptables -t nat -A shadowsocks -d 224.0.0.0/4 -j RETURN
+	# iptables -t nat -A shadowsocks -d 240.0.0.0/4 -j RETURN
+	# iptables -t nat -A shadowsocks -m set --match-set shadowsocks dst -j RETURN
+	iptables -t nat -A shadowsocks -p tcp -d 10.1.0.0/16  -j REDIRECT --to-ports 1090
+	iptables -t nat -A shadowsocks -p tcp -j RETURN 
 
 	iptables -t nat -A OUTPUT -p tcp -j shadowsocks
 	echo '创建iptables规则成功！'
@@ -111,13 +112,13 @@ create(){
 	then
 		mkdir /root/.sscnf
 	fi
-	sstunnel
+	# sstunnel
 	ssredir
-	chinadns
-	updateresolv
+	# chinadns
+	# updateresolv
 	createipsetandiptables
 
-	echo '翻墙成功！'
+	echo 'done！'
 }
 
 ubuntuinstall(){
@@ -172,7 +173,7 @@ remove(){
 		centosremove
 	fi
 
-	echo '取消翻墙，复原所有更改成功！'
+	echo '取消连通，复原所有更改成功！'
 }
 ubunturemove(){
 	apt remove -y shadowsocks-libev
